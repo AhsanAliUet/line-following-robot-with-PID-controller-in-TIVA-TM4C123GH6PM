@@ -13,5 +13,5 @@ Go ahead! Enjoy the project
 
 
 # Author
-@Ahsan Ali ![https://github.com/AhsanAliUet/]
+- [@Ahsan Ali](https://github.com/AhsanAliUet)
 
