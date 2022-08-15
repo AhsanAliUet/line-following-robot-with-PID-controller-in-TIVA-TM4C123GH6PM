@@ -1,0 +1,7 @@
+Extract all the folders in the TivaC Drivers.
+When you will connect Tiva with your laptop,
+Go to Device Manager
+In "Other Devices" you will see two question marked devices.
+Click "Update Driver" 
+Chooose Browse my Computer and provide the path to the folder where you extracted the TivaC Drivers for both of them.
+It will update the driver.
