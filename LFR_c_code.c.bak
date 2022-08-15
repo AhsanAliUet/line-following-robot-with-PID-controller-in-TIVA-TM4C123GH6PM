@@ -177,3 +177,204 @@ void Delay(long value)
 int dutyCycle(double duty);
 
 int motorLeftDuty, motorRightDuty;
+
+int main (void)
+{
+			//PID data starts here
+	int error = 0; int previous_error = 0; int ref = 150; int current_position = 150;
+	float d_error; float i_error = 0;
+	float pid, Kp, Kd, Ki, baseSpeed = 900;
+	
+	int sen1;
+	int sen2;
+	int sen3;
+	int sen4;
+	int sen5;
+	int sen6;
+	
+	int left = 0x04; //10 //to move left tyre forward
+	int right = 0x10;
+	//int forward = 0x50;
+	int stop = 0x00;
+	volatile unsigned delay_clk;
+
+	int dutyLeft  = 10400;    //Timer A PF2
+	int dutyRight = 11200;    //Timer B PF3
+	
+	Timer1A_Init (); // Initialize the timer
+	Timer1B_Init();	
+			
+	SYSCTL_RCGCGPIO_R |= (CLK_PORTA + CLK_PORTB);  
+	delay_clk 		    = SYSCTL_RCGCGPIO_R; //dummy delay to pass 3 cycles
+
+	GPIO_PORTA_DEN_R  |= (PA2 + PA3 + PA4 + PA5 + PA6);
+	GPIO_PORTA_DIR_R 	|= (PA2 + PA3 + PA4 + PA5 + PA6);	
+	//GPIO_PORTA_PUR_R  |= (PA2 + PA3 + PA4 + PA5 + PA6);
+	
+	GPIO_PORTB_DEN_R 	|= (PB0 + PB1 + PB2 + PB3 + PB4);
+	//GPIO_PORTB_DIR_R 	|= (PB0 + PB1 + PB2 + PB3 + PB4);
+	GPIO_PORTB_DIR_R 	&= ~(PB0 + PB1 + PB2 + PB3 + PB4);	
+	GPIO_PORTB_PUR_R  |= (PB0 + PB1 + PB2 + PB3 + PB4);
+	
+	
+
+	GPTM_TA_MATCH_R = dutyCycle(0);
+	GPTM_TB_MATCH_R = dutyCycle(0);
+	while(1)
+		{
+			
+			
+		sen1 = GPIO_PORTB_DATA_R & PB0;   // stores Input of PB2
+		sen2 = GPIO_PORTB_DATA_R & PB1;   // stores Input of PB1
+		sen3 = GPIO_PORTB_DATA_R & PB2;   // stores Input of PB2
+		sen4 = GPIO_PORTB_DATA_R & PB3;   // stores Input of PB3
+		sen5 = GPIO_PORTB_DATA_R & PB4;   // stores Input of PB4
+		sen6 = GPIO_PORTB_DATA_R & PB5;   // stores Input of PB5  //obstacle sensor
+	
+	//Remember: not (!) sign represents black is detected (Black line)
+	//If you want to use the PID controller then comment the un-commented lines of code and un-comment the commented ones in all of the if-elseif statements below
+		if (!sen1 && !sen2 && sen3 && !sen4 && !sen5)
+		{
+				GPTM_TA_MATCH_R = dutyCycle(70);
+				GPTM_TB_MATCH_R = dutyCycle(70);
+				//current_position = 75;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (sen1 && sen2 && !sen3 && sen4 && sen5)
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(50);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 75;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		else if (sen1 && !sen2 && !sen3 && !sen4 && sen5)
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(50);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 75;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		else if (!sen1 && sen2 && sen3 && sen4 && !sen5)
+		{
+				GPTM_TA_MATCH_R = dutyCycle(100);
+				GPTM_TB_MATCH_R = dutyCycle(100);
+				//current_position = 75;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (sen1 && sen2 && sen3 && !sen4 && !sen5)
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(0);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 120;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (!sen1 && !sen2 && sen3 && sen4 && sen5)
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(50);
+				GPTM_TB_MATCH_R = dutyCycle(0);
+				//current_position = 30;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		
+		else if (sen1 && sen2 && sen3 && !sen4 && !sen5) //right most two sensors
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(0);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 120;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}		
+		
+		else if (!sen1 && sen2 && sen3 && sen4 && sen5) //left most sensor only
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(50);
+				GPTM_TB_MATCH_R = dutyCycle(0);
+				//current_position = 10;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		else if (sen1 && sen2 && sen3 && sen4 && !sen5) //right most sensor only
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(0);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 140;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+	
+		
+		else if (sen1 && !sen2 && sen3 && sen4 && sen5) //S2
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(50);
+				GPTM_TB_MATCH_R = dutyCycle(0);
+				//current_position = 45;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (sen1 && sen2 && sen3 && !sen4 && sen5) //S4
+		{
+
+				GPTM_TA_MATCH_R = dutyCycle(0);
+				GPTM_TB_MATCH_R = dutyCycle(50);
+				//current_position = 95;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (!sen1 && !sen2 && !sen3 && !sen4 && !sen5)
+		{
+				
+				GPTM_TA_MATCH_R = dutyCycle(0);    //right motor
+				GPTM_TB_MATCH_R = dutyCycle(0);     //left motor
+				//current_position = 150;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		else if (sen1 && sen2 && sen3 && sen4 && sen5)
+		{
+				
+				GPTM_TA_MATCH_R = dutyCycle(70);
+				GPTM_TB_MATCH_R = dutyCycle(70);
+				//current_position = 0;
+				//GPTM_TA_MATCH_R = motorLeftDuty;
+				//GPTM_TB_MATCH_R = motorRightDuty;
+		}
+		
+		else if (!sen6)    //obstacle, then stop the car
+		{
+				GPTM_TA_MATCH_R = dutyCycle(0);
+				GPTM_TB_MATCH_R = dutyCycle(0);
+		}
+			
+		
+		//PID coding starts here
+		error = ref - current_position;
+		d_error = error - previous_error;
+		i_error = i_error + error;
+		
+		pid = Kp + d_error * Kd + i_error * Ki;
+		
+		motorLeftDuty = baseSpeed + pid;
+		motorRightDuty = baseSpeed - pid;
+	
+		}
+	}
