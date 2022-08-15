@@ -1,0 +1,12 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Ahsan Ali\OneDrive\Desktop\GitHub\LFR_github\Keil uVision Project\LFR_KeilProject.uvproj
+Project File Date:  08/15/2022
+
+<h2>Output:</h2>
+Load "C:\\Users\\Ahsan Ali\\OneDrive\\Desktop\\GitHub\\LFR_github\\Keil uVision Project\\LFR_KeilProject.axf" 
+_____^
+*** error 56: cannot open file
