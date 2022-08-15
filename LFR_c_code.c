@@ -394,3 +394,13 @@ int dutyCycle(double duty)
 		else 
 				return 15999;
 }
+
+void dutyLeftMotor()
+{
+		GPTM_TB_MATCH_R = motorRightDuty;
+}
+
+void dutyRightMotor()
+{
+		GPTM_TA_MATCH_R = motorLeftDuty;
+}
