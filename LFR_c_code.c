@@ -386,3 +386,11 @@ void Delay_ms(int time_ms)
         for(j = 0; j < 3180; j++)
             {}  /* excute NOP for 1ms */
 }
+
+int dutyCycle(double duty)
+{
+		if (duty != 0)
+				return ((100-duty)/100) * 16000;
+		else 
+				return 15999;
+}
