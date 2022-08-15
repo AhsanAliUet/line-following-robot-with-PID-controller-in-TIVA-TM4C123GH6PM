@@ -177,6 +177,3 @@ void Delay(long value)
 int dutyCycle(double duty);
 
 int motorLeftDuty, motorRightDuty;
-
-
-
